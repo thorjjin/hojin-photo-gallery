@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f3ef"><meta name="description" content="김호진의 사진을 감상하는 온라인 사진 전시회"><title>김호진 사진 전시회</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f3ef;--fg:#242522;--mut:#777a73;--ac:#9a8056;
+  --pn:#fff;--ln:#e7e5df;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px)
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
+  font-family:Inter,ui-sans-serif,system-ui,"Noto Sans KR","Apple SD Gothic Neo",sans-serif;overflow:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#c:active{cursor:grabbing}
+.bar{
+  position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;
+  display:flex;gap:10px;align-items:center;padding:18px 28px;
+  pointer-events:none;z-index:4
+}
+.bar:before{
+  content:"";position:absolute;inset:0 0 -1px;
+  background:linear-gradient(180deg,rgba(248,247,243,.94),rgba(248,247,243,.78));
+  border-bottom:1px solid rgba(50,50,45,.08);backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);z-index:-1
+}
+.bar b{flex:1;font-size:14px;font-weight:650;letter-spacing:.16em;text-transform:uppercase;color:#34352f}
+button,select,input,textarea{
+  font:inherit;color:var(--fg);background:#fff;border:1px solid #e3e1da;
+  border-radius:10px;padding:10px 13px;box-shadow:0 1px 2px #25251a08
+}
+button{cursor:pointer;pointer-events:auto;transition:background .2s,border-color .2s,transform .2s}
+button:hover{border-color:#b9a47e;background:#faf8f2}
+button:active{transform:translateY(1px)}
+.pri{background:#292b26;color:#fff;border-color:#292b26;font-weight:600}
+.pri:hover{background:#45483f;color:#fff;border-color:#45483f}
+#hint{
+  position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;
+  transform:translateX(-50%);text-align:center;font-size:11px;letter-spacing:.035em;
+  color:#62645d;background:rgba(250,249,246,.88);border:1px solid #e5e2da;
+  border-radius:999px;padding:10px 17px;pointer-events:none;white-space:nowrap;
+  box-shadow:0 5px 24px #25251a0d;backdrop-filter:blur(12px)
+}
+#pad{
+  position:fixed;left:22px;bottom:calc(58px + env(safe-area-inset-bottom,0px));
+  width:118px;height:118px;border-radius:50%;background:rgba(255,255,255,.52);
+  border:1px solid rgba(80,78,68,.2);touch-action:none;z-index:5;
+  box-shadow:0 8px 28px #25251a12;backdrop-filter:blur(8px)
+}
+#knob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;
+  border-radius:50%;background:#a18a64;box-shadow:0 3px 12px #0002;pointer-events:none}
+#m{position:fixed;inset:0;background:rgba(32,33,29,.42);display:flex;align-items:center;
+  justify-content:center;z-index:9;padding:18px;backdrop-filter:blur(9px)}
+#m[hidden]{display:none}
+.p{
+  background:#fbfaf7;border:1px solid rgba(255,255,255,.75);border-radius:18px;
+  padding:24px;width:min(1000px,95vw);max-height:88vh;overflow:auto;
+  box-shadow:0 24px 90px #15161030
+}
+.p.sm{width:min(540px,94vw)}
+.p h2{margin:0 0 8px;font-size:23px;letter-spacing:-.035em;font-weight:650}
+.mut{color:var(--mut);font-size:12px}
+.v{display:flex;gap:22px}
+.v #z{flex:1.4;min-height:50vh;background:#eeede8;border-radius:12px;overflow:hidden;
+  position:relative;display:flex;align-items:center;justify-content:center;touch-action:none}
+#zi{max-width:100%;max-height:74vh;user-select:none;-webkit-user-drag:none;transform-origin:center}
+.zb{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.s{flex:0 0 320px;min-width:0}
+.f{display:grid;gap:9px;margin-top:12px}
+.f textarea{min-height:78px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid #b7a17a;outline-offset:2px}
+.cm{border-top:1px solid var(--ln);padding:11px 0;font-size:13px;line-height:1.65;word-break:break-word}
+.tag{display:inline-block;font-size:10px;background:#efede6;border-radius:20px;
+  padding:3px 9px;margin-left:6px;color:#8a7048}
+.rb{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.rb button.on{border-color:#b7a17a;background:#f2eee5}
+.ex{font-size:12px;color:var(--mut);line-height:1.9;margin:10px 0}
+#toast{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#292b26;
+  color:#fff;padding:10px 17px;border-radius:999px;z-index:20;font-size:13px;
+  box-shadow:0 8px 24px #0002}
+@media(max-width:720px){
+  .bar{padding:12px 13px;gap:6px}
+  .bar b{font-size:11px;letter-spacing:.1em}
+  .bar button{font-size:11px;padding:8px 9px;border-radius:9px}
+  .v{flex-direction:column;gap:14px}.s{flex:none}
+  .v #z{min-height:36vh}
+  .p{padding:17px;border-radius:15px}
+  #hint{max-width:calc(100vw - 26px);white-space:normal;line-height:1.5;font-size:10px}
+  #pad{width:104px;height:104px;left:14px;bottom:calc(55px + env(safe-area-inset-bottom,0px))}
+}
+</style></head><body>
+<canvas id="c"></canvas>
+<div class="bar"><b>김호진 사진 전시회</b><button onclick="openProfile()">작가 프로필</button><button onclick="openGuest()">방명록</button><button id="ab" onclick="openAdmin()">🔑</button></div>
+<div id="pad"><div id="knob"></div></div>
+<div id="hint">드래그로 둘러보기 · 사진을 탭/클릭하면 확대 감상 · 휠로 시야 확대 · PC는 WASD · 모바일은 왼쪽 조이스틱으로 이동 · © 김호진</div>
+<div id="m" hidden></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js"></script>
+<script>
+const NAME="김호진",$=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// Firebase Console > Project settings > Your apps에서 발급한 웹 앱 설정을 입력하세요.
+const FIREBASE_CONFIG={apiKey:"YOUR_API_KEY",authDomain:"YOUR_PROJECT_ID.firebaseapp.com",projectId:"YOUR_PROJECT_ID",storageBucket:"YOUR_PROJECT_ID.appspot.com",messagingSenderId:"YOUR_MESSAGING_SENDER_ID",appId:"YOUR_APP_ID"};
+let db,auth,storage,uid=null,admin=false,photos=[],comments=[],guest=[],reacts=[],profile={},cur=null,gOpen=false;
+const firebaseReady=()=>FIREBASE_CONFIG.apiKey!=="YOUR_API_KEY"&&FIREBASE_CONFIG.projectId!=="YOUR_PROJECT_ID";
+const assets={upload:async(blob)=>{const path=`photos/${uid}/${crypto.randomUUID()}.jpg`,ref=storage.ref(path);await ref.put(blob,{contentType:"image/jpeg"});return {url:await ref.getDownloadURL(),id:path}},delete:async(path)=>storage.ref(path).delete()};
+const dd=x=>{const v=typeof x.data==="function"?x.data():x.data;return v||{}};
+const rows=s=>s.docs.map(d=>({id:d.id,...dd(d)}));
+const toast=t=>{const e=document.createElement("div");e.id="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)};
+const modal=(h,c="")=>{const m=$("#m");m.innerHTML=`<div class="p ${c}">${h}</div>`;m.hidden=false};
+const closeM=()=>{$("#m").hidden=true;$("#m").innerHTML="";cur=null;gOpen=false};
+$("#m").addEventListener("pointerdown",e=>{if(e.target.id==="m"&&!$("#m").dataset.lock)closeM()});
+const date=t=>new Date(t).toLocaleDateString("ko-KR");
+const nick=()=>{try{return localStorage.getItem("nick")||""}catch(e){return""}};
+const saveNick=v=>{try{localStorage.setItem("nick",v)}catch(e){}};
+async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("hj-gallery:"+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+
+/* ---------- 3D ---------- */
+let R,S,C,G,L=24,meshes=[],yaw=0,pit=0,fov=65,jx=0,jy=0,last=0;const keys={};
+function init3(){R=new THREE.WebGLRenderer({canvas:$("#c"),antialias:true});R.setPixelRatio(Math.min(devicePixelRatio||1,3));R.outputEncoding=THREE.sRGBEncoding;
+S=new THREE.Scene();S.background=new THREE.Color(0xf1f0eb);S.fog=new THREE.Fog(0xf1f0eb,22,58);
+C=new THREE.PerspectiveCamera(fov,1,.1,100);C.position.set(0,1.6,4);
+S.add(new THREE.HemisphereLight(0xffffff,0xd8d3c8,1.35));const d=new THREE.DirectionalLight(0xffffff,.8);d.position.set(0,5,2);S.add(d);
+G=new THREE.Group();S.add(G);rs();addEventListener("resize",rs);build();requestAnimationFrame(loop)}
+function rs(){R.setSize(innerWidth,innerHeight,false);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}
+const txt=(lines,W,H,bg,fg)=>{const c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");if(bg){g.fillStyle=bg;g.fillRect(0,0,W,H)}g.fillStyle=fg;g.textAlign="center";lines.forEach(([t,sz,y])=>{g.font=`${sz}px sans-serif`;g.fillText(t,W/2,y)});const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t};
+function build(){if(!G)return;while(G.children.length)G.remove(G.children[0]);meshes=[];
+L=Math.max(24,Math.ceil(photos.length/2)*5+8);const len=L+6,cz=(6-L)/2,M=c=>new THREE.MeshStandardMaterial({color:c,side:THREE.DoubleSide});
+const add=(w,h,mat,x,y,z,rx,ry)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);m.position.set(x,y,z);m.rotation.set(rx,ry,0);G.add(m)};
+add(8,len,M(0xd9d6ce),0,0,cz,-Math.PI/2,0);
+add(len,3.6,M(0xfaf9f5),-4,1.8,cz,0,Math.PI/2);add(len,3.6,M(0xfaf9f5),4,1.8,cz,0,-Math.PI/2);
+add(8,3.6,M(0xfaf9f5),0,1.8,-L,0,0);add(8,3.6,M(0xfaf9f5),0,1.8,6,0,Math.PI);
+if(!photos.length)$("#hint").textContent="아직 전시된 작품이 없습니다 · 🔑 로 작품을 등록하세요";
+photos.forEach((p,i)=>{const left=i%2===0,z=-(3+Math.floor(i/2)*5);
+new THREE.TextureLoader().load(p.url,t=>{t.encoding=THREE.sRGBEncoding;t.anisotropy=R.capabilities.getMaxAnisotropy();const a=t.image.width/t.image.height;let h=2.2,w=h*a;if(w>3.4){w=3.4;h=w/a}
+const g=new THREE.Group(),fr=new THREE.Mesh(new THREE.BoxGeometry(w+.2,h+.2,.06),new THREE.MeshStandardMaterial({color:0xfaf9f5})),
+im=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t}));im.position.z=.04;im.userData.id=p.id;
+const pl=new THREE.Mesh(new THREE.PlaneGeometry(1.6,.4),new THREE.MeshBasicMaterial({map:txt([[String(p.title||"").slice(0,16),88,144],[NAME,56,256],],1280,320,"#f4f2ee","#222")}));pl.position.set(0,-h/2-.5,.03);
+g.add(fr,im,pl);g.position.set(left?-3.95:3.95,1.7,z);g.rotation.y=left?Math.PI/2:-Math.PI/2;G.add(g);meshes.push(im)})})}
+function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,(t-last)/1000);last=t;
+if($("#m").hidden){const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-jy,sd=(keys.KeyD?1:0)-(keys.KeyA?1:0)+jx,sp=3.2*dt;
+C.position.x=Math.max(-3,Math.min(3,C.position.x+(-Math.sin(yaw)*f+Math.cos(yaw)*sd)*sp));
+C.position.z=Math.max(-L+1.5,Math.min(5,C.position.z+(-Math.cos(yaw)*f-Math.sin(yaw)*sd)*sp));
+if(keys.ArrowLeft)yaw+=1.6*dt;if(keys.ArrowRight)yaw-=1.6*dt}
+C.rotation.set(pit,yaw,0,"YXZ");R.render(S,C)}
+addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;keys[e.code]=1});addEventListener("keyup",e=>keys[e.code]=0);
+const cv=$("#c");let dn=null;
+cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);dn={x:e.clientX,y:e.clientY,mx:0}};
+cv.onpointermove=e=>{if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;dn.mx+=Math.abs(dx)+Math.abs(dy);dn.x=e.clientX;dn.y=e.clientY;yaw-=dx*.005;pit=Math.max(-1,Math.min(1,pit-dy*.005))};
+cv.onpointerup=e=>{if(dn&&dn.mx<6)pick(e.clientX,e.clientY);dn=null};
+cv.onwheel=e=>{e.preventDefault();fov=Math.max(25,Math.min(75,fov+e.deltaY*.03));C.fov=fov;C.updateProjectionMatrix()};
+const rc=new THREE.Raycaster();
+function pick(x,y){rc.setFromCamera({x:x/innerWidth*2-1,y:-(y/innerHeight)*2+1},C);const h=rc.intersectObjects(meshes)[0];if(h)openPhoto(h.object.userData.id)}
+(()=>{const p=$("#pad"),k=$("#knob");let id=null;const mvk=e=>{const r=p.getBoundingClientRect(),R0=r.width/2,L0=R0-24;let x=e.clientX-r.left-R0,y=e.clientY-r.top-R0;const d=Math.hypot(x,y),m=Math.min(d,L0);if(d>0){x*=m/d;y*=m/d}k.style.transform=`translate(${x}px,${y}px)`;jx=x/L0;jy=y/L0};
+p.onpointerdown=e=>{id=e.pointerId;p.setPointerCapture(id);mvk(e)};p.onpointermove=e=>{if(e.pointerId===id)mvk(e)};
+p.onpointerup=p.onpointercancel=()=>{id=null;jx=jy=0;k.style.transform="translate(0,0)"}})();
+
+/* ---------- 작품 감상 ---------- */
+const RT=[["heart","❤️","좋아요"],["clap","👏","응원"],["fire","🔥","멋져요"]];
+function openPhoto(id){const p=photos.find(x=>x.id===id);if(!p)return;cur=id;const e=p.exif||{};
+modal(`<div class="v"><div id="z"><img id="zi" src="${esc(p.url)}" alt="${esc(p.title)}"><div class="zb"><button id="zp">＋</button><button id="zm">－</button></div></div>
+<div class="s"><div style="display:flex;justify-content:space-between;gap:8px"><h2>${esc(p.title)}</h2><button onclick="closeM()">✕</button></div>
+<div class="mut">작가 ${NAME} · ${date(p.t)}</div><p style="white-space:pre-wrap">${esc(p.desc)}</p>
+<div class="ex">${e.cam?`📷 ${esc(e.cam)}<br>`:""}${e.lens?`🔭 ${esc(e.lens)}<br>`:""}${e.set?`⚙️ ${esc(e.set)}<br>`:""}${e.date?`🕒 ${esc(e.date)}`:""}${!e.cam&&!e.lens&&!e.set?"촬영 정보 없음":""}</div>
+<div class="rb" id="rb"></div>${admin?`<button id="dl" onclick="delPhoto('${id}',this)">작품 삭제</button>`:""}
+<h3 style="margin:14px 0 4px">응원·조언 남기기</h3><div id="cl"></div>
+<div class="f"><input id="cn" maxlength="20" placeholder="이번 댓글에 표시할 닉네임 (매번 입력)"><select id="ck"><option>응원</option><option>감상</option><option>조언</option><option>개선할 점</option></select>
+<textarea id="ct" maxlength="500" placeholder="사진에 대한 생각을 남겨주세요"></textarea><button class="pri" onclick="addCmt()">등록</button></div></div></div>`);
+zoom();renderRB();renderCL()}
+function zoom(){const z=$("#z"),i=$("#zi");let s=1,x=0,y=0,d0=0,s0=1;const ps=new Map(),ap=()=>i.style.transform=`translate(${x}px,${y}px) scale(${s})`,set=v=>{s=Math.min(6,Math.max(1,v));if(s===1)x=y=0;ap()};
+z.onwheel=e=>{e.preventDefault();set(s*Math.exp(-e.deltaY*.0015))};
+z.onpointerdown=e=>{if(e.target.tagName==="BUTTON")return;z.setPointerCapture(e.pointerId);ps.set(e.pointerId,[e.clientX,e.clientY]);if(ps.size===2){const[a,b]=[...ps.values()];d0=Math.hypot(a[0]-b[0],a[1]-b[1]);s0=s}};
+z.onpointermove=e=>{const p=ps.get(e.pointerId);if(!p)return;ps.set(e.pointerId,[e.clientX,e.clientY]);if(ps.size===2){const[a,b]=[...ps.values()];set(s0*Math.hypot(a[0]-b[0],a[1]-b[1])/d0)}else if(s>1){x+=e.clientX-p[0];y+=e.clientY-p[1];ap()}};
+z.onpointerup=z.onpointercancel=e=>ps.delete(e.pointerId);z.ondblclick=()=>set(s>1?1:2.5);
+$("#zp").onclick=()=>set(s*1.4);$("#zm").onclick=()=>set(s/1.4)}
+function renderRB(){const b=$("#rb");if(!b||!cur)return;b.innerHTML=RT.map(([k,em,l])=>{const n=reacts.filter(r=>r.pid===cur&&r.type===k).length,on=reacts.some(r=>r.pid===cur&&r.type===k&&r.uid===uid);return`<button class="${on?"on":""}" onclick="react('${k}')">${em} ${l} ${n}</button>`}).join("")}
+async function react(k){if(!db||!uid)return toast("잠시 후 다시 시도해주세요");const r=db.doc(`reactions/${cur}_${uid}_${k}`);try{reacts.some(x=>x.pid===cur&&x.type===k&&x.uid===uid)?await r.delete():await r.set({pid:cur,uid,type:k,t:Date.now()})}catch(e){toast("저장하지 못했습니다")}}
+function renderCL(){const l=$("#cl");if(!l||!cur)return;const a=comments.filter(c=>c.pid===cur).reverse();
+l.innerHTML=a.length?a.map(c=>`<div class="cm"><b>${esc(c.nick)}</b><span class="tag">${esc(c.kind)}</span> <span class="mut">${date(c.t)}</span>${admin?` <button onclick="del('comments','${c.id}')">삭제</button>`:""}<br>${esc(c.text)}</div>`).join(""):'<div class="mut">첫 번째 응원을 남겨주세요!</div>'}
+async function addCmt(){const n=$("#cn").value.trim(),t=$("#ct").value.trim();if(!n||!t)return toast("닉네임과 내용을 입력해주세요");if(!db)return toast("댓글 작성은 현재 불가합니다 (읽기 전용)");
+try{await db.collection("comments").add({pid:cur,uid,nick:n,text:t,kind:$("#ck").value,t:Date.now()});$("#cn").value="";$("#ct").value="";toast("댓글을 등록했습니다")}catch(e){toast("권한이 없어 등록하지 못했습니다")}}
+const del=async(c,id)=>{try{await db.doc(`${c}/${id}`).delete()}catch(e){toast("삭제하지 못했습니다")}};
+async function delPhoto(id,b){if(!b.dataset.ok){b.dataset.ok=1;b.textContent="정말 삭제할까요? 한 번 더";return}const p=photos.find(x=>x.id===id);try{await db.doc("photos/"+id).delete();if(p?.assetId&&assets)assets.delete(p.assetId).catch(()=>{});closeM()}catch(e){toast("삭제하지 못했습니다")}}
+
+/* ---------- 방명록 / 프로필 ---------- */
+function openGuest(){gOpen=true;modal(`<div style="display:flex;justify-content:space-between"><h2>방명록</h2><button onclick="closeM()">✕</button></div>
+<div class="f"><input id="gn" maxlength="20" placeholder="닉네임 (로그인 불필요)" value="${esc(nick())}"><textarea id="gt" maxlength="500" placeholder="전시회에 다녀간 흔적을 남겨주세요"></textarea><button class="pri" onclick="addGuest()">남기기</button></div><div id="gl" style="margin-top:10px"></div>`,"sm");renderGL()}
+function renderGL(){const l=$("#gl");if(!l||!gOpen)return;const a=[...guest].reverse();l.innerHTML=a.length?a.map(c=>`<div class="cm"><b>${esc(c.nick)}</b> <span class="mut">${date(c.t)}</span>${admin?` <button onclick="del('guestbook','${c.id}')">삭제</button>`:""}<br>${esc(c.text)}</div>`).join(""):'<div class="mut">아직 방명록이 비어 있어요.</div>'}
+async function addGuest(){const n=$("#gn").value.trim(),t=$("#gt").value.trim();if(!n||!t)return toast("닉네임과 내용을 입력해주세요");if(!db)return toast("현재 읽기 전용입니다");
+try{await db.collection("guestbook").add({uid,nick:n,text:t,t:Date.now()});saveNick(n);$("#gt").value=""}catch(e){toast("권한이 없어 등록하지 못했습니다")}}
+function openProfile(){modal(`<div style="display:flex;justify-content:space-between"><h2>작가 ${NAME}</h2><button onclick="closeM()">✕</button></div>
+${admin?`<div class="f"><textarea id="pb" style="min-height:140px" placeholder="작가 소개">${esc(profile.bio)}</textarea><input id="pc" placeholder="연락처 / SNS" value="${esc(profile.contact)}"><button class="pri" onclick="saveProfile()">프로필 저장</button></div>`
+:`<p style="white-space:pre-wrap">${esc(profile.bio)||'<span class="mut">작가 소개가 아직 없습니다.</span>'}</p>${profile.contact?`<p class="mut">${esc(profile.contact)}</p>`:""}`}`,"sm")}
+async function saveProfile(){try{await db.doc("profile/main").set({bio:$("#pb").value,contact:$("#pc").value});toast("저장했습니다");closeM()}catch(e){toast("저장하지 못했습니다")}}
+
+/* ---------- 관리자 ---------- */
+async function openAdmin(){
+if(admin)return adminPanel();
+if(!auth)return toast("Firebase 설정을 먼저 완료해주세요");
+modal(`<h2>관리자 로그인</h2><p class="mut">작가 관리자 계정으로 로그인해 주세요.</p><div class="f"><input id="ae" type="email" autocomplete="username" placeholder="관리자 이메일"><input id="ap" type="password" autocomplete="current-password" placeholder="비밀번호"><button class="pri" id="alogin">로그인</button><button onclick="closeM()">취소</button></div>`,'sm');
+$("#alogin").onclick=async()=>{const b=$("#alogin");b.disabled=true;try{const cred=await auth.signInWithEmailAndPassword($("#ae").value.trim(),$("#ap").value);const token=await cred.user.getIdTokenResult(true);if(token.claims.admin!==true){await auth.signOut();throw new Error("이 계정에는 관리자 권한이 없습니다. 초기 관리자 설정 안내를 확인해주세요.")}admin=true;uid=cred.user.uid;$("#ab").textContent="🔓";adminPanel()}catch(e){toast(e.message||"로그인에 실패했습니다");b.disabled=false}}
+}
+async function logoutAdmin(){await auth.signOut();admin=false;uid=null;await auth.signInAnonymously();uid=auth.currentUser.uid;$("#ab").textContent="🔑";closeM();toast("관리자 로그아웃 완료")}
+function editPhoto(id){const p=photos.find(x=>x.id===id);if(!p)return;modal(`<div style="display:flex;justify-content:space-between"><h2>작품 정보 수정</h2><button onclick="adminPanel()">닫기</button></div><div class="f"><input id="et" value="${esc(p.title)}" placeholder="제목"><textarea id="ed">${esc(p.desc||"")}</textarea><input id="ec" value="${esc(p.exif?.cam||"")}" placeholder="촬영 기기"><input id="el" value="${esc(p.exif?.lens||"")}" placeholder="렌즈"><input id="es" value="${esc(p.exif?.set||"")}" placeholder="촬영 설정"><button class="pri" onclick="savePhotoEdit('${id}')">수정 저장</button></div>`,'sm')}
+async function savePhotoEdit(id){try{await db.collection("photos").doc(id).update({title:$("#et").value.trim(),desc:$("#ed").value,exif:{cam:$("#ec").value,lens:$("#el").value,set:$("#es").value,date:photos.find(p=>p.id===id)?.exif?.date||""},updatedAt:Date.now()});toast("작품 정보를 수정했습니다");adminPanel()}catch(e){toast("수정하지 못했습니다")}}
+function renderAdminPhotos(){const el=$("#adminPhotos");if(!el)return;el.innerHTML=photos.length?photos.map(p=>`<div class="cm" style="display:flex;align-items:center;gap:10px"><img src="${esc(p.url)}" style="width:58px;height:58px;object-fit:cover;border-radius:8px"><div style="flex:1;min-width:0"><b>${esc(p.title)}</b><div class="mut">${date(p.t)}</div></div><button onclick="editPhoto('${p.id}')">수정</button><button onclick="delPhoto('${p.id}',this)">삭제</button></div>`).join(""):'<p class="mut">아직 등록된 작품이 없습니다.</p>'}
+function adminPanel(){modal(`<div style="display:flex;justify-content:space-between"><h2>작품 전시하기</h2><button onclick="closeM()">✕</button></div>
+<p class="mut">업로드한 사진은 누구나 볼 수 있습니다. 본인이 촬영했거나 게시 허락을 받은 사진만 올려주세요.</p><div class="f"><input id="uf" type="file" accept="image/jpeg,image/png,image/webp"><input id="ut" placeholder="작품 제목"><textarea id="ud" placeholder="작품 설명"></textarea>
+<input id="uc" placeholder="촬영 기기 (자동 감지)"><input id="ul" placeholder="렌즈 (자동 감지)"><input id="us" placeholder="촬영 설정 (자동 감지)"><button class="pri" id="ug">전시하기</button>
+<button onclick="openProfile()">작가 프로필 편집</button><button onclick="logoutAdmin()">관리자 로그아웃</button></div><h3 style="margin-top:22px">등록된 작품 관리</h3><div id="adminPhotos"></div>`,"sm");
+renderAdminPhotos();
+let dt="";$("#uf").onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!$("#ut").value)$("#ut").value=f.name.replace(/\.\w+$/,"");
+let x=null;try{x=await exifr.parse(f,{pick:["Make","Model","LensModel","FNumber","ExposureTime","ISO","FocalLength","DateTimeOriginal"]})}catch(_){}
+if(!x)return toast("메타데이터를 찾지 못했습니다. 직접 입력할 수 있어요");
+const mk=(x.Make||"").trim(),md=(x.Model||"").trim();$("#uc").value=md.startsWith(mk)?md:`${mk} ${md}`.trim();$("#ul").value=x.LensModel||"";
+const ex=x.ExposureTime?(x.ExposureTime<1?`1/${Math.round(1/x.ExposureTime)}s`:`${x.ExposureTime}s`):"";
+$("#us").value=[x.FocalLength&&`${Math.round(x.FocalLength)}mm`,x.FNumber&&`f/${x.FNumber}`,ex,x.ISO&&`ISO ${x.ISO}`].filter(Boolean).join(" · ");dt=x.DateTimeOriginal?date(x.DateTimeOriginal):""};
+$("#ug").onclick=async()=>{const f=$("#uf").files[0],t=$("#ut").value.trim();if(!f||!t)return toast("사진과 제목을 입력해주세요");if(!assets)return toast("이미지 저장 기능을 사용할 수 없습니다");
+const b=$("#ug");b.disabled=true;b.textContent="업로드 중...";
+try{const bm=await createImageBitmap(f),sc=Math.min(1,4096/Math.max(bm.width,bm.height)),k=document.createElement("canvas");k.width=Math.round(bm.width*sc);k.height=Math.round(bm.height*sc);k.getContext("2d").drawImage(bm,0,0,k.width,k.height);
+const bl=await new Promise(r=>k.toBlob(r,"image/jpeg",.95)),up=await assets.upload(bl);
+await db.collection("photos").add({title:t,desc:$("#ud").value,url:up.url,assetId:up.id,ownerUid:uid,exif:{cam:$("#uc").value,lens:$("#ul").value,set:$("#us").value,date:dt},t:Date.now()});toast("전시를 시작했습니다");closeM()}
+catch(e){toast("업로드에 실패했습니다");b.disabled=false;b.textContent="전시하기"}}}
+
+/* ---------- Firebase 연결 및 실시간 시작 ---------- */
+modal(`<h2>⚠️ 저작권 안내</h2><p style="line-height:1.7">이 전시회의 모든 사진과 글의 저작권은 작가 <b>${NAME}</b>에게 있습니다.<br>작가의 허락 없는 복제·게시·배포·2차 가공·상업적 이용 및 AI 학습 사용을 금지합니다.<br>작품 사용 문의는 작가 프로필의 연락처로 해주세요.</p><button class="pri" onclick="$('#m').dataset.lock='';closeM()">확인하고 입장하기</button>`,"sm");$("#m").dataset.lock="1";
+init3();
+(async()=>{
+if(!firebaseReady()){$("#hint").textContent="Firebase 설정이 필요합니다 · README의 설정 안내를 따라주세요";toast("아직 Firebase 연결 전입니다. 사이트 설정을 완료하면 게시·댓글이 활성화됩니다.");return}
+try{
+if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.firestore();storage=firebase.storage();
+await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+if(!auth.currentUser)await auth.signInAnonymously();
+uid=auth.currentUser.uid;
+auth.onAuthStateChanged(async u=>{if(!u)return;uid=u.uid;try{const tok=await u.getIdTokenResult(true);admin=tok.claims.admin===true;$("#ab").textContent=admin?"🔓":"🔑"}catch(e){admin=false}});
+const sub=(q,f)=>q.onSnapshot(s=>f(s),e=>{console.error(e);toast("실시간 데이터를 불러오지 못했습니다. Firebase 보안 규칙을 확인해주세요.")});
+sub(db.collection("photos").orderBy("t","asc"),s=>{photos=rows(s);build();renderAdminPhotos();if(cur&&!photos.some(p=>p.id===cur))closeM()});
+sub(db.collection("comments").orderBy("t","asc"),s=>{comments=rows(s);renderCL()});
+sub(db.collection("guestbook").orderBy("t","asc"),s=>{guest=rows(s);renderGL()});
+sub(db.collection("reactions"),s=>{reacts=rows(s);renderRB()});
+sub(db.doc("profile/main"),s=>{profile=dd(s)});
+}catch(e){console.error(e);$("#hint").textContent="Firebase 연결 오류 · 설정과 보안 규칙을 확인해주세요";toast("Firebase 연결에 실패했습니다")}
+})();
+</script></body></html>
